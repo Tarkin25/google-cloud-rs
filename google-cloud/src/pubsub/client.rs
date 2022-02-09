@@ -43,17 +43,16 @@ impl Client {
     /// Create a new client for the specified project.
     ///
     /// Credentials are looked up in the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
-    pub async fn new(project_name: impl Into<String>) -> Result<Client, Error> {
+    pub async fn new() -> Result<Client, Error> {
         let path = env::var("GOOGLE_APPLICATION_CREDENTIALS")?;
         let file = File::open(path)?;
         let creds = json::from_reader(file)?;
 
-        Client::from_credentials(project_name, creds).await
+        Client::from_credentials(creds).await
     }
 
     /// Create a new client for the specified project with custom credentials.
     pub async fn from_credentials(
-        project_name: impl Into<String>,
         creds: ApplicationCredentials,
     ) -> Result<Client, Error> {
         let endpoint_str = env::var("PUBSUB_EMULATOR_HOST")
@@ -76,7 +75,7 @@ impl Client {
         let channel = endpoint.connect().await?;
 
         Ok(Client {
-            project_name: project_name.into(),
+            project_name: creds.project_id.clone(),
             publisher: PublisherClient::new(channel.clone()),
             subscriber: SubscriberClient::new(channel),
             token_manager: Arc::new(Mutex::new(TokenManager::new(
