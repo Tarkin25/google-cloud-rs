@@ -1,4 +1,5 @@
 use std::collections::{HashMap, VecDeque};
+use std::fmt::{Debug, Formatter};
 
 use chrono::Duration;
 
@@ -147,6 +148,14 @@ impl Subscription {
         let response = response.into_inner();
 
         Ok(response.received_messages)
+    }
+}
+
+impl Debug for Subscription {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Subscription")
+            .field("name", &self.name)
+            .finish()
     }
 }
 
